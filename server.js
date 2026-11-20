@@ -128,3 +128,16 @@ app.get('/', (req, res) => res.send('SF Chats & Calls Dual Push Server (Android 
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Push Server চলছে পোর্ট ${PORT}-এ`));
+
+// ==================== সার্ভার ২৪ ঘণ্টা সচল রাখার Self-Ping কোড ====================
+const https = require('https');
+const RENDER_URL = 'https://sf-chats-calls.onrender.com'; // এখানে আপনার আসল Render লিংক দিন
+
+setInterval(() => {
+    https.get(RENDER_URL, (res) => {
+        console.log('Self-ping সফল হয়েছে, সার্ভার সচল আছে!');
+    }).on('error', (err) => {
+        console.error('Self-ping ত্রুটি:', err.message);
+    });
+}, 10 * 60 * 1000); // প্রতি ১০ মিনিট পরপর সার্ভার নিজেকে পিং করবে
+
