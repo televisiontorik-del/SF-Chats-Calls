@@ -69,25 +69,31 @@ app.post('/send-notification', async (req, res) => {
     // ক) Android মোবাইল অ্যাপে Firebase High-Priority পুশ পাঠানো
     const fcmToken = userFcmTokens[targetPhone];
     if (fcmToken && admin.apps.length > 0) {
+        // কলের জন্য Data-only হাই-প্রায়োরিটি মেসেজ (যাতে বন্ধ থাকা অ্যাপ নিজে থেকে চালু হয়)
+        const isCall = (type === 'call');
         const message = {
             token: fcmToken,
-            notification: {
-                title: title || 'SF Chats & Calls',
-                body: body || 'নতুন বার্তা এসেছে'
-            },
             android: {
-                priority: 'high',
-                notification: {
-                    sound: 'default',
-                    channelId: 'default'
-                }
+                priority: 'high'
             },
             data: {
                 type: type || 'message',
                 title: title || 'SF Chats & Calls',
-                body: body || ''
+                body: body || 'নতুন বার্তা এসেছে'
             }
         };
+
+        // শুধুমাত্র সাধারণ মেসেজের ক্ষেত্রে সিস্টেম নোটিফিকেশন ব্লক যুক্ত হবে
+        if (!isCall) {
+            message.notification = {
+                title: title || 'SF Chats & Calls',
+                body: body || 'নতুন বার্তা এসেছে'
+            };
+            message.android.notification = {
+                sound: 'default',
+                channelId: 'default'
+            };
+        }
 
         try {
             await admin.messaging().send(message);
